@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="request">
+        <xs:complexType>
+            <xs:attribute name="requestId" type="xs:string" use="required"/>
+            <xs:attribute name="hash" type="xs:string" use="required"/>
+            <xs:attribute name="alphabet" type="xs:string" use="required"/>
+            <xs:attribute name="maxLength" type="xs:integer" use="required"/>
+            <xs:attribute name="partNumber" type="xs:integer" use="required"/>
+            <xs:attribute name="partCount" type="xs:integer" use="required"/>
+
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="response">
+        <xs:complexType>
+            <xs:attribute name="requestId" type="xs:string" use="required"/>
+            <xs:attribute name="result" type="xs:string" minOccurs="0" maxOccurs="unbounded" use="required" />
+            <xs:attribute name="partNumber" type="xs:integer" use="required"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

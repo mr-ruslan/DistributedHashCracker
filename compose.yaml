@@ -1,0 +1,100 @@
+name: hc-v2
+
+services:
+
+  mongodb_0:
+    container_name: mongodb0
+    image: mongo:5
+    command: --replSet rs0 --oplogSize 128
+    ports:
+      - 27017:27017
+    volumes:
+      - ./.data/mongodb_0:/data/db
+    depends_on:
+      - mongodb_1
+      - mongodb_2
+    networks:
+      - local-net
+
+  mongodb_1:
+    container_name: mongodb1
+    image: mongo:5
+    command: --replSet rs0 --oplogSize 128
+    ports:
+      - 27018:27017
+    volumes:
+      - ./.data/mongodb_1:/data/db
+    networks:
+      - local-net
+
+  mongodb_2:
+    container_name: mongodb2
+    image: mongo:5
+    command: --replSet rs0 --oplogSize 128
+    ports:
+      - 27019:27017
+    volumes:
+      - ./.data/mongodb_2:/data/db
+    networks:
+      - local-net
+
+  setup-rs:
+    container_name: setup-rs
+    image: "setup-rs"
+    restart: "no"
+    build: ./init_mongo
+    depends_on:
+      - mongodb_0
+    networks:
+      - local-net
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    deploy:
+      replicas: 2
+    networks:
+      - my-network
+    depends_on:
+      - rabbitmq
+  
+
+  manager:
+    container_name: manager
+    build:
+      context: .
+      dockerfile: manager.Dockerfile
+    ports:
+      - 5000:5000
+    networks:
+      - local-net
+      - my-network
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    volumes:
+      - ./.data/rabbitmq/data:/var/lib/rabbitmq
+      - ./.data/rabbitmq/log:/var/log/rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - my-network
+
+volumes:
+  mongodb_data_0:
+  mongodb_data_1:
+  mongodb_data_2:
+
+networks:
+  my-network:
+    driver: bridge
+  local-net:
+    driver: bridge
